@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
 (function() {
 
     // ================== CONFIG ==================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8SInfWJv3A2mSkf4RA7ALWlKFnKVfZUdZQ4PXA8JEo3Y6bVuiXCRmwARPNT2XGrVR/exec"; // ใส่ URL Apps Script ของคุณ
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFxhNQFpVj7uEUkDrwmc2CpHFIkwmcJmjXQgrFk4fHqySKnclaRz0v_1vF-29KPgsd/exec"; // ใส่ URL Apps Script ของคุณ
     const SPREADSHEET_ID = '1cXn3MeDVm9aXizyrHZ5wg1YO-KXRu_miLLwKwPnt3-o';
     const API_KEY = 'AIzaSyCx48x1ZIramjylyvWWXBLDMButbXyxzNM';
     const SHEET_NAME = 'memberlist';
