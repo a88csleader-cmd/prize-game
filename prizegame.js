@@ -1,4 +1,3 @@
-<script>
     (function() {
         // ป้องกันการชนกับโค้ดอื่น
         if (window.prizeGameLoaded) return;
@@ -180,4 +179,3 @@
             }
         });
     })();
-</script>
