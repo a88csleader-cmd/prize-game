@@ -78,7 +78,7 @@
                     prizeData = [];
                 }
                 
-                statusDiv.textContent = `พร้อมเล่นแล้ว! โหลดข้อมูล ${prizeData.length} รายการ`;
+                statusDiv.textContent = `พร้อมเล่นแล้ว!`;
                 
             } catch (error) {
                 console.error("Error:", error);
