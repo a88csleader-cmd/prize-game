@@ -1,3 +1,4 @@
+<script>
     (function() {
         // ป้องกันการชนกับโค้ดอื่น
         if (window.prizeGameLoaded) return;
@@ -93,11 +94,11 @@
                     prizeData = [];
                 }
                 
-                statusDiv.textContent = `พร้อมเล่นแล้ว! ขอให้โชคดีค่ะ`;
+                statusDiv.innerHTML = `✅ <span style="color:#2e7d32">พร้อมเล่นแล้ว! ขอให้โชคดีค่ะ</span>`;
                 
             } catch (error) {
                 console.error("Error:", error);
-                statusDiv.textContent = "⚠️ เกิดข้อผิดพลาดในการโหลดข้อมูล";
+                statusDiv.innerHTML = `⚠️ <span style="color:#c62828">เกิดข้อผิดพลาดในการโหลดข้อมูล</span>`;
                 
                 // ข้อมูลตัวอย่างเมื่อเชื่อมต่อไม่ได้
                 prizeData = [
@@ -109,7 +110,7 @@
                     ['member2', '🍫 ช็อกโกแลต']
                 ].map(row => row.map(cell => decodeThaiText(cell)));
                 
-                statusDiv.textContent += " ใช้ข้อมูลตัวอย่าง";
+                statusDiv.innerHTML += ` <span style="color:#f57c00">ใช้ข้อมูลตัวอย่าง</span>`;
             }
         }
 
@@ -149,9 +150,10 @@
             const previous = hasPlayed(username);
             if (previous) {
                 const decodedPrize = decodeThaiText(previous);
-                prizeDisplay.textContent = `คุณเล่นแล้ว ได้: ${decodedPrize}`;
+                prizeDisplay.innerHTML = `<span style="color:#ffd700">🎉 คุณเล่นแล้ว ได้: ${decodedPrize}</span>`;
                 startBtn.textContent = "เล่นแล้ว";
                 startBtn.disabled = true;
+                statusDiv.innerHTML = `ℹ️ <span style="color:#f57c00">${username} เคยเล่นแล้ว ได้รับ ${decodedPrize}</span>`;
                 return;
             }
 
@@ -170,7 +172,7 @@
             
             if (!found) {
                 console.log(`ไม่พบ ${username} ในรายการ`);
-                statusDiv.textContent = `⚠️ ไม่พบ ${username} ในรายการ จะได้รับรางวัลเริ่มต้น`;
+                statusDiv.innerHTML = `⚠️ <span style="color:#f57c00">ไม่พบ ${username} ในรายการ จะได้รับรางวัลเริ่มต้น</span>`;
             }
 
             selectedPrize = decodeThaiText(selectedPrize);
@@ -183,13 +185,13 @@
             // เริ่มสุ่มแบบไม่สิ้นสุด
             spinCount = 0;
             prizeDisplay.classList.add('spinning');
-            prizeDisplay.innerHTML = '<span class="loading-spinner"></span> กำลังสุ่ม...';
+            prizeDisplay.innerHTML = '<span class="loading-spinner"></span> <span style="color:#ffd700">กำลังสุ่ม...</span>';
             
             intervalId = setInterval(() => {
                 spinCount++;
                 // สุ่มรางวัลจากรายการ prizes
                 const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
-                prizeDisplay.textContent = randomPrize;
+                prizeDisplay.innerHTML = `<span style="color:#ffd700">${randomPrize}</span>`;
                 
                 // ทุก 20 ครั้ง แสดงข้อความเร็วๆ
                 if (spinCount % 20 === 0) {
@@ -198,11 +200,11 @@
                         prizeDisplay.style.transform = 'scale(1)';
                     }, 50);
                 }
-            }, 80); // เปลี่ยนทุก 80 มิลลิวินาที
+            }, 80);
 
             startBtn.style.display = 'none';
             stopBtn.style.display = 'block';
-            statusDiv.textContent = 'กำลังสุ่ม... กด "หยุด" เพื่อรับรางวัล';
+            statusDiv.innerHTML = '🎲 <span style="color:#2e7d32">กำลังสุ่ม... กด "หยุด" เพื่อรับรางวัล</span>';
         });
 
         stopBtn.addEventListener('click', () => {
@@ -212,7 +214,7 @@
             }
             
             prizeDisplay.classList.remove('spinning');
-            prizeDisplay.textContent = selectedPrize;
+            prizeDisplay.innerHTML = `<span style="color:#ffd700; font-size:36px;">🎉 ${selectedPrize}</span>`;
             prizeDisplay.style.transform = 'scale(1)';
 
             const username = usernameInput.value.trim().toLowerCase();
@@ -223,13 +225,16 @@
             startBtn.disabled = true;
             stopBtn.style.display = 'none';
             
-            statusDiv.textContent = `🎉 บันทึกแล้ว: ${username} ได้รับ ${selectedPrize}`;
+            statusDiv.innerHTML = `✅ <span style="color:#2e7d32; font-weight:bold;">บันทึกแล้ว: ${username} ได้รับ ${selectedPrize}</span>`;
             
             // เอฟเฟกต์เมื่อได้รางวัล
-            prizeDisplay.style.backgroundColor = '#f0f8ff';
+            prizeDisplay.style.backgroundColor = '#1a2634';
+            prizeDisplay.style.borderColor = '#ffd700';
+            prizeDisplay.style.boxShadow = '0 0 20px rgba(255,215,0,0.3)';
+            
             setTimeout(() => {
-                prizeDisplay.style.backgroundColor = '#f9f9f9';
-            }, 500);
+                prizeDisplay.style.boxShadow = 'none';
+            }, 1000);
         });
 
         // กด Enter เพื่อเริ่ม
@@ -254,3 +259,4 @@
             }
         });
     })();
+</script>
