@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = await resp.json();
             prizeData = data.values || [];
             if(prizeData.length > 0) prizeData.shift(); // ลบ header
-            statusDiv.textContent = `🎉พร้อมเล่น!`;
+            statusDiv.textContent = `🎉พร้อมเล่น ขอให้โชคดีค่ะ!`;
         } catch(e) {
             console.error(e);
             // fallback ข้อมูลตัวอย่าง
