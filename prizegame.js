@@ -1,5 +1,5 @@
 // ================== CONFIG ==================
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrAbrWLUyu6Nlnz1iVPx5GFLhuPlX057M4dEyTFqNrs7-BkzYvRnQ4gZGXHe81W1YG/exec"; // ตัวอย่าง: https://script.google.com/macros/s/xxx/exec
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrAbrWLUyu6Nlnz1iVPx5GFLhuPlX057M4dEyTFqNrs7-BkzYvRnQ4gZGXHe81W1YG/exec"; 
 // ============================================
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -17,8 +17,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const statusDiv = container.querySelector('#status');
 
     let selectedPrize = null;
-
-    // รายการรางวัลแบบสุ่มโชว์ (ไม่ใช่รางวัลจริง)
     const spinItems = [
         "🧧 8 บาท","🧧 18 บาท","🧧 28 บาท","🧧 38 บาท",
         "🧧 58 บาท","🧧 68 บาท","🧧 88 บาท","🧧 128 บาท",
@@ -26,37 +24,28 @@ document.addEventListener("DOMContentLoaded", function () {
         "💰 อั่งเปาพิเศษ","🎁 ของขวัญปีใหม่","🧧 ลุ้นใหม่ในกิจกรรมครั้งหน้า"
     ];
 
-    // ================== Helper ==================
     function createLineButton(){
         if(document.getElementById("line-contact-btn")) return;
         const lineBtn = document.createElement("a");
         lineBtn.id = "line-contact-btn";
         lineBtn.className = "line-btn pulse";
         lineBtn.target = "_blank";
-        lineBtn.href = "https://line.me/R/ti/p/@685pkvqa"; // LINE OA ของคุณ
+        lineBtn.href = "https://line.me/R/ti/p/@685pkvqa";
         lineBtn.innerHTML = '<img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" class="line-icon"> ติดต่อเจ้าหน้าที่ผ่าน LINE';
         container.appendChild(lineBtn);
     }
 
     function showResult(prize){
         createLineButton();
-
         if(prize.includes("ลุ้นใหม่")){
             prizeDisplay.style.color = "#fff";
-            prizeDisplay.classList.remove("win-effect");
             statusDiv.innerHTML = "📸 กรุณาแคปหน้าจอผลลัพธ์นี้เพื่อรับสิทธิ์ในครั้งต่อไป";
-            statusDiv.style.color = "#FFD700";
-            statusDiv.style.fontWeight = "bold";
             return;
         }
-
         prizeDisplay.style.color = "gold";
-        prizeDisplay.classList.add("win-effect");
         statusDiv.innerHTML = "🎉 กรุณาแคปหน้าจอผลลัพธ์นี้และติดต่อเจ้าหน้าที่เพื่อรับรางวัล";
-        statusDiv.style.color = "#FFD700";
-        statusDiv.style.fontWeight = "bold";
 
-        // พลุเล็ก ๆ
+        // เอฟเฟกต์เล็กๆ
         for(let i=0;i<8;i++){
             const firework = document.createElement("div");
             firework.className = "firework";
@@ -65,52 +54,67 @@ document.addEventListener("DOMContentLoaded", function () {
             container.appendChild(firework);
             setTimeout(()=>firework.remove(),1000);
         }
-
-        setTimeout(()=>{ prizeDisplay.style.transform="scale(1)"; },600);
     }
 
-    // ================== Spin Animation ==================
-    function spinAnimation(){
+    function spinAnimation(fakePrize, callback){
         let speed = 50;
         let spinCount = 0;
         prizeDisplay.classList.add("spinning");
 
-        function spinStep(){
+        function step(){
             prizeDisplay.textContent = spinItems[Math.floor(Math.random()*spinItems.length)];
             spinCount++;
             if(spinCount > 20) speed += 15;
             if(spinCount < 40){
-                setTimeout(spinStep, speed);
+                setTimeout(step, speed);
             } else {
                 prizeDisplay.classList.remove("spinning");
-                prizeDisplay.textContent = selectedPrize;
-                showResult(selectedPrize);
+                prizeDisplay.textContent = fakePrize;
+                callback();
             }
         }
-        spinStep();
+        step();
     }
 
-    // ================== Start Button ==================
     startBtn.addEventListener('click', async () => {
         const username = usernameInput.value.trim();
         if(!username) return alert("กรุณาใส่ยูสเซอร์เนม");
 
-        // แสดงรางวัลแบบสุ่มก่อน (fake) ให้เหมือนสุ่มจริง
-        selectedPrize = spinItems[Math.floor(Math.random()*spinItems.length)];
-        prizeDisplay.innerHTML = "🎰 กำลังสุ่ม...";
         startBtn.disabled = true;
+        const fakePrize = spinItems[Math.floor(Math.random()*spinItems.length)];
+        prizeDisplay.textContent = "🎰 กำลังสุ่ม...";
 
-        spinAnimation();
+        // สปินโชว์แบบปลอมก่อน
+        spinAnimation(fakePrize, async () => {
+            try{
+                const resp = await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    body: JSON.stringify({username})
+                });
+                const data = await resp.json();
 
-        // ส่งข้อมูลไป Apps Script เพื่อบันทึกรางวัลจริง
-        try{
-            await fetch(SCRIPT_URL, {
-                method:"POST",
-                body: JSON.stringify({username})
-            });
-        }catch(e){
-            console.error("ส่งผลลัพธ์ไป Apps Script ล้มเหลว", e);
-        }
+                if(data.status === "notfound"){
+                    prizeDisplay.textContent = "❌ ไม่พบชื่อในระบบ";
+                    statusDiv.textContent = "กรุณาตรวจสอบยูสเซอร์เนมอีกครั้ง";
+                    startBtn.disabled = false;
+                    return;
+                }
+
+                selectedPrize = data.prize || "🧧 ลุ้นใหม่ในกิจกรรมครั้งหน้า";
+                prizeDisplay.textContent = selectedPrize;
+
+                if(data.status === "played"){
+                    statusDiv.textContent = "คุณเล่นไปแล้ว";
+                } else {
+                    showResult(selectedPrize);
+                }
+
+            } catch(e){
+                console.error("ส่งข้อมูลไป Apps Script ล้มเหลว", e);
+                prizeDisplay.textContent = "⚠️ เกิดข้อผิดพลาด";
+                statusDiv.textContent = "ลองรีเฟรชหน้าจอแล้วเล่นอีกครั้ง";
+            }
+        });
     });
 
 })();
