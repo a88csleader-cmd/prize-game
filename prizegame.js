@@ -1,11 +1,13 @@
 // ================== CONFIG ==================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrAbrWLUyu6Nlnz1iVPx5GFLhuPlX057M4dEyTFqNrs7-BkzYvRnQ4gZGXHe81W1YG/exec";
-    // ============================================
-document.addEventListener("DOMContentLoaded", function () {
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrAbrWLUyu6Nlnz1iVPx5GFLhuPlX057M4dEyTFqNrs7-BkzYvRnQ4gZGXHe81W1YG/exec";
+// ============================================
 
+document.addEventListener("DOMContentLoaded", function () {
 (function(){
 
     const container = document.getElementById('prize-game-container');
+    if(!container) return;
+
     const startBtn = container.querySelector('#start-btn');
     const prizeDisplay = container.querySelector('#prize-display');
     const usernameInput = container.querySelector('#username');
@@ -112,6 +114,12 @@ document.addEventListener("DOMContentLoaded", function () {
         prizeDisplay.innerHTML = "🎰 กำลังสุ่ม...";
         startBtn.disabled = true;
         spinAnimation(selectedPrize);
+
+        // ส่งผลลัพธ์กลับ Apps Script
+        fetch(SCRIPT_URL,{
+            method:"POST",
+            body: JSON.stringify({username, prize:selectedPrize})
+        }).catch(e=>console.error(e));
     });
 
 })();
