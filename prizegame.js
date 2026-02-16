@@ -1,5 +1,5 @@
 // ================== CONFIG ==================
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrAbrWLUyu6Nlnz1iVPx5GFLhuPlX057M4dEyTFqNrs7-BkzYvRnQ4gZGXHe81W1YG/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrAbrWLUyu6Nlnz1iVPx5GFLhuPlX057M4dEyTFqNrs7-BkzYvRnQ4gZGXHe81W1YG/exec"; // เปลี่ยนเป็นของคุณ
 // ============================================
 
 document.addEventListener("DOMContentLoaded", function () {
