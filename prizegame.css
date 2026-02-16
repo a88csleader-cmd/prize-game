@@ -1,0 +1,63 @@
+/* Container */
+#prize-game-container {
+    max-width: 420px;
+    width: 90%;
+    margin: 20px auto;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 0 25px rgba(255,215,0,0.6);
+    background: linear-gradient(135deg, #8B0000, #B22222);
+    color: #fff;
+    border: 3px solid gold;
+    text-align: center;
+    font-family: "Tahoma", "Leelawadee UI", sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+#prize-game-container h1 { font-size: 26px; margin-bottom: 15px; color: gold; text-shadow: 0 0 8px gold; }
+#prize-game-container p { font-size: 18px; margin-bottom: 15px; }
+#prize-game-container input { width: 100%; padding: 15px; font-size: 18px; border-radius: 10px; border: none; margin-bottom: 20px; }
+#prize-game-container button { width: 100%; padding: 18px; font-size: 20px; border-radius: 10px; font-weight: bold; cursor: pointer; background: linear-gradient(45deg, gold, orange); color: #8B0000; border: none; transition: all 0.3s; }
+#prize-game-container button:disabled { opacity: 0.6; cursor: not-allowed; }
+#prize-display { font-size: 30px; font-weight: bold; padding: 20px; border-radius: 12px; border: 2px solid gold; margin: 25px 0; background: rgba(255,255,255,0.1); transition: all 0.3s ease; }
+#status { font-size: 16px; margin-top: 10px; }
+
+/* Effects */
+.spinning { animation: pulse 0.3s infinite alternate; }
+@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+.win-effect { text-shadow: 0 0 10px gold, 0 0 20px orange; }
+.firework { position: absolute; width: 10px; height: 10px; background: gold; border-radius: 50%; animation: explode 1s ease-out forwards; }
+@keyframes explode { 0% { transform: scale(1); opacity:1; } 100% { transform: scale(6); opacity:0; } }
+
+/* LINE Button */
+.line-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-top:15px;
+    padding:14px;
+    background:#06C755;
+    color:#fff;
+    text-decoration:none;
+    font-weight:bold;
+    border-radius:8px;
+    transition:0.3s;
+    font-size:18px;
+}
+.line-btn:hover{ background:#05a948; }
+.line-icon{ width:22px; height:22px; height:22px; }
+
+/* กระพริบ */
+.pulse{
+    animation: pulseLine 1.2s infinite;
+}
+@keyframes pulseLine{
+    0%{ box-shadow:0 0 0 0 rgba(6,199,85,0.7); }
+    70%{ box-shadow:0 0 0 15px rgba(6,199,85,0); }
+    100%{ box-shadow:0 0 0 0 rgba(6,199,85,0); }
+}
+
+/* Responsive */
+@media screen and (max-width:480px){ #prize-display { font-size: 24px; } }
