@@ -1,9 +1,10 @@
-document.addEventListener("DOMContentLoaded", function () {
-
-(function(){
 // ================== CONFIG ==================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrAbrWLUyu6Nlnz1iVPx5GFLhuPlX057M4dEyTFqNrs7-BkzYvRnQ4gZGXHe81W1YG/exec";
     // ============================================
+document.addEventListener("DOMContentLoaded", function () {
+
+(function(){
+
     const container = document.getElementById('prize-game-container');
     const startBtn = container.querySelector('#start-btn');
     const prizeDisplay = container.querySelector('#prize-display');
