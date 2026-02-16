@@ -27,7 +27,7 @@ Username: ${username}
     const encodedMessage = encodeURIComponent(message);
 
     // 🔥 ใช้ลิงก์ OA ของคุณ
-    const lineURL = `https://lin.ee/Nb2TD8R?text=${encodedMessage}`;
+    const lineURL = `https://line.me/R/ti/p/@685pkvqa?text=${encodedMessage}`;
 
     if(!lineBtn){
         lineBtn = document.createElement("a");
