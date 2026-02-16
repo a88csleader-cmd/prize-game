@@ -3,145 +3,142 @@ document.addEventListener("DOMContentLoaded", function () {
 (function() {
 
     // ================== CONFIG ==================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFxhNQFpVj7uEUkDrwmc2CpHFIkwmcJmjXQgrFk4fHqySKnclaRz0v_1vF-29KPgsd/exec"; // ใส่ URL Apps Script ของคุณ
-    const SPREADSHEET_ID = '1cXn3MeDVm9aXizyrHZ5wg1YO-KXRu_miLLwKwPnt3-o';
-    const API_KEY = 'AIzaSyCx48x1ZIramjylyvWWXBLDMButbXyxzNM';
-    const SHEET_NAME = 'memberlist';
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrAbrWLUyu6Nlnz1iVPx5GFLhuPlX057M4dEyTFqNrs7-BkzYvRnQ4gZGXHe81W1YG/exec";
     // ============================================
 
     const container = document.getElementById('prize-game-container');
     if (!container) return;
 
     const startBtn = container.querySelector('#start-btn');
-    const stopBtn = container.querySelector('#stop-btn');
+    const stopBtn = container.querySelector('#stop-btn'); // ถ้ายังมีใน HTML
     const prizeDisplay = container.querySelector('#prize-display');
     const usernameInput = container.querySelector('#username');
     const statusDiv = container.querySelector('#status');
 
-    let prizeData = null;
-    let selectedPrize = null;
+    if (stopBtn) stopBtn.style.display = "none";
 
-    // รางวัลสุ่มแบบเยอะ
+    let isPlaying = false;
+
+    // รายการสุ่มเพื่อทำ animation เท่านั้น (ไม่ใช่รางวัลจริง)
     const spinItems = [
         "🧧 8 บาท","🧧 18 บาท","🧧 28 บาท","🧧 38 บาท",
         "🧧 58 บาท","🧧 68 บาท","🧧 88 บาท","🧧 128 บาท",
         "🧧 168 บาท","🧧 188 บาท","🧧 288 บาท",
-        "💰 อั่งเปาพิเศษ","🎁 ของขวัญปีใหม่","❌ ไม่ได้ของรางวัล"
+        "💰 อั่งเปาพิเศษ","🎁 ของขวัญปีใหม่",
+        "❌ ไม่ได้ของรางวัล"
     ];
 
-    // ================= Load Google Sheets =================
-    async function loadPrizeData() {
-        statusDiv.textContent = "⏳ กำลังโหลดข้อมูล...";
-        try {
-            const range = `${SHEET_NAME}!A:C`;
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
-            const resp = await fetch(url);
-            const data = await resp.json();
-            prizeData = data.values || [];
-            if(prizeData.length > 0) prizeData.shift(); // ลบ header
-            statusDiv.textContent = `🎉 โหลดข้อมูล ${prizeData.length} รายการ พร้อมเล่น!`;
-        } catch(e) {
-            console.error(e);
-            // fallback ข้อมูลตัวอย่าง
-            prizeData = [
-                ['lan94774', '188 บาท', 'YES'],
-                ['testuser', '288 บาท', ''],
-                ['demo123', '88 บาท', ''],
-                ['guest', 'ไม่ได้ของรางวัล', '']
-            ];
-            statusDiv.textContent = "⚠️ ใช้ข้อมูลตัวอย่าง";
-        }
-    }
-    loadPrizeData();
+    // ================== Animation ==================
+    function spinAnimation(finalPrize){
 
-    // ================= Helper =================
-    function getUserRow(username){
-        return prizeData.find(r => r[0]?.toLowerCase() === username.toLowerCase());
-    }
-
-    // ================== Spin Animation ==================
-    function spinAnimation(selectedPrize){
-        let speed = 50;
+        let speed = 60;
         let spinCount = 0;
 
         prizeDisplay.classList.add("spinning");
 
         function spinStep(){
-            prizeDisplay.textContent = spinItems[Math.floor(Math.random()*spinItems.length)];
+            prizeDisplay.textContent =
+                spinItems[Math.floor(Math.random()*spinItems.length)];
+
             spinCount++;
-            if(spinCount > 20) speed += 15; // ชะลอ
-            if(spinCount < 40){
+
+            if(spinCount > 20) speed += 20; // ค่อยๆช้าลง
+
+            if(spinCount < 45){
                 setTimeout(spinStep, speed);
             } else {
                 prizeDisplay.classList.remove("spinning");
-                prizeDisplay.textContent = selectedPrize;
+                prizeDisplay.textContent = finalPrize;
+                showWinEffect(finalPrize);
             }
         }
+
         spinStep();
     }
 
-    // ================== Start Button ==================
-    startBtn.addEventListener('click', () => {
+    // ================== เอฟเฟกต์ตอนถูกรางวัล ==================
+    function showWinEffect(prize){
+
+        if(prize.includes("ไม่ได้")) return;
+
+        prizeDisplay.style.color = "gold";
+        prizeDisplay.style.transform = "scale(1.2)";
+        prizeDisplay.classList.add("win-effect");
+
+        for(let i=0;i<8;i++){
+            const firework = document.createElement("div");
+            firework.className = "firework";
+            firework.style.top = Math.random()*100 + "%";
+            firework.style.left = Math.random()*100 + "%";
+            container.appendChild(firework);
+            setTimeout(()=>firework.remove(),1000);
+        }
+
+        setTimeout(()=>{
+            prizeDisplay.style.transform="scale(1)";
+        },600);
+    }
+
+    // ================== ปุ่มเริ่ม ==================
+    startBtn.addEventListener('click', async () => {
+
+        if(isPlaying) return;
+
         const username = usernameInput.value.trim();
         if(!username) return alert("กรุณาใส่ยูสเซอร์เนม");
 
-        const userRow = getUserRow(username);
-        if(!userRow) return alert("ไม่พบชื่อในระบบ");
-
-        if(userRow[2]==="YES"){
-            prizeDisplay.textContent = `คุณเล่นแล้ว ได้: ${userRow[1]}`;
-            startBtn.disabled = true;
-            return;
-        }
-
-        selectedPrize = userRow[1] || "ไม่ได้ของรางวัล";
-
-        prizeDisplay.innerHTML = "🎰 กำลังสุ่ม...";
-        startBtn.style.display = "none";
-        stopBtn.style.display = "block";
-
-        spinAnimation(selectedPrize);
-    });
-
-    // ================== Stop Button ==================
-    stopBtn.addEventListener('click', async () => {
-
-        stopBtn.style.display = "none";
-        startBtn.textContent = "เล่นแล้ว";
+        isPlaying = true;
         startBtn.disabled = true;
-        startBtn.style.display = "block";
+        statusDiv.textContent = "⏳ กำลังตรวจสอบข้อมูล...";
 
-        // เอฟเฟกต์ถูกรางวัล
-        if(selectedPrize !== "ไม่ได้ของรางวัล"){
-            prizeDisplay.style.color = "gold";
-            prizeDisplay.style.fontSize = "32px";
-            prizeDisplay.style.transform = "scale(1.2)";
-            prizeDisplay.classList.add("win-effect");
+        // ทำให้ดูเหมือนกำลังสุ่ม
+        prizeDisplay.textContent = "🎰 กำลังสุ่ม...";
+        
+        try{
 
-            for(let i=0;i<8;i++){
-                const firework = document.createElement("div");
-                firework.className = "firework";
-                firework.style.top = Math.random()*100 + "%";
-                firework.style.left = Math.random()*100 + "%";
-                container.appendChild(firework);
-                setTimeout(()=>firework.remove(),1000);
+            // หน่วงเวลาเล็กน้อยให้ดูสมจริง
+            await new Promise(r => setTimeout(r, 1200));
+
+            const resp = await fetch(SCRIPT_URL,{
+                method:"POST",
+                body: JSON.stringify({username})
+            });
+
+            const result = await resp.json();
+
+            if(result.status === "notfound"){
+                alert("ไม่พบชื่อในระบบ");
+                resetGame();
+                return;
             }
 
-            setTimeout(()=>{prizeDisplay.style.transform="scale(1)";},500);
+            if(result.status === "played"){
+                prizeDisplay.textContent = 
+                    `คุณเล่นแล้ว ได้: ${result.prize}`;
+                statusDiv.textContent = "⚠️ บัญชีนี้เล่นแล้ว";
+                return;
+            }
+
+            // เริ่ม animation แล้วไปหยุดที่รางวัลจริง
+            spinAnimation(result.prize);
+
+            statusDiv.textContent = "✅ บันทึกผลเรียบร้อยแล้ว";
+
+        }catch(e){
+            console.error(e);
+            alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
+            resetGame();
         }
 
-        const username = usernameInput.value.trim();
-
-        // บันทึกผลกลับ Apps Script
-        try{
-            await fetch(SCRIPT_URL,{
-                method:"POST",
-                body: JSON.stringify({username, prize:selectedPrize})
-            });
-        }catch(e){ console.error("บันทึกผลล้มเหลว", e); }
-
-        statusDiv.textContent = "✅ บันทึกผลเรียบร้อยแล้ว";
     });
+
+    // ================== Reset ==================
+    function resetGame(){
+        isPlaying = false;
+        startBtn.disabled = false;
+        prizeDisplay.textContent = "🎁 กดเริ่มเพื่อเล่น";
+        statusDiv.textContent = "";
+    }
 
 })();
 });
