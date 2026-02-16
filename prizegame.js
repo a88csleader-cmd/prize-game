@@ -1,205 +1,116 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-(function() {
-
-    // ================== CONFIG ==================
+(function(){
+// ================== CONFIG ==================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrAbrWLUyu6Nlnz1iVPx5GFLhuPlX057M4dEyTFqNrs7-BkzYvRnQ4gZGXHe81W1YG/exec";
     // ============================================
-
     const container = document.getElementById('prize-game-container');
-    if (!container) return;
-
     const startBtn = container.querySelector('#start-btn');
-    const stopBtn = container.querySelector('#stop-btn'); // ถ้ายังมีใน HTML
     const prizeDisplay = container.querySelector('#prize-display');
     const usernameInput = container.querySelector('#username');
     const statusDiv = container.querySelector('#status');
 
-function createLineButton(username, prize){
+    let prizeData = [
+        ['lan94774', '188 บาท', 'YES'],
+        ['testuser', '288 บาท', ''],
+        ['demo123', '88 บาท', ''],
+        ['guest', '🧧 ลุ้นใหม่ในกิจกรรมครั้งหน้า', '']
+    ];
 
-    let lineBtn = document.getElementById("line-contact-btn");
+    let selectedPrize = null;
 
-    const message =
-`แจ้งรับสิทธิ์กิจกรรมอั่งเปา
-Username: ${username}
-ผลรางวัล: ${prize}`;
-
-    const encodedMessage = encodeURIComponent(message);
-
-    // 🔥 ใช้ลิงก์ OA ของคุณ
-    const lineURL = `https://line.me/R/ti/p/@685pkvqa?text=${encodedMessage}`;
-
-    if(!lineBtn){
-        lineBtn = document.createElement("a");
-        lineBtn.id = "line-contact-btn";
-        lineBtn.className = "line-btn pulse";
-        lineBtn.target = "_blank";
-        container.appendChild(lineBtn);
-    }
-
-    lineBtn.href = lineURL;
-
-    lineBtn.innerHTML = `
-        <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" 
-             class="line-icon">
-        แจ้งผ่าน LINE
-    `;
-
-    // auto copy ข้อความไว้ใน clipboard ด้วย
-    navigator.clipboard.writeText(message).catch(()=>{});
-}
-
-
-    if (stopBtn) stopBtn.style.display = "none";
-
-    let isPlaying = false;
-
-    // รายการสุ่มเพื่อทำ animation เท่านั้น (ไม่ใช่รางวัลจริง)
     const spinItems = [
         "🧧 8 บาท","🧧 18 บาท","🧧 28 บาท","🧧 38 บาท",
         "🧧 58 บาท","🧧 68 บาท","🧧 88 บาท","🧧 128 บาท",
         "🧧 168 บาท","🧧 188 บาท","🧧 288 บาท",
-        "💰 อั่งเปาพิเศษ","🎁 ของขวัญปีใหม่",
-        "❌ ไม่ได้ของรางวัล"
+        "💰 อั่งเปาพิเศษ","🎁 ของขวัญปีใหม่","🧧 ลุ้นใหม่ในกิจกรรมครั้งหน้า"
     ];
 
-    // ================== Animation ==================
-    function spinAnimation(finalPrize){
+    function getUserRow(username){
+        return prizeData.find(r => r[0]?.toLowerCase() === username.toLowerCase());
+    }
 
-        let speed = 60;
+    function spinAnimation(selectedPrize){
+        let speed = 50;
         let spinCount = 0;
-
         prizeDisplay.classList.add("spinning");
 
         function spinStep(){
-            prizeDisplay.textContent =
-                spinItems[Math.floor(Math.random()*spinItems.length)];
-
+            prizeDisplay.textContent = spinItems[Math.floor(Math.random()*spinItems.length)];
             spinCount++;
-
-            if(spinCount > 20) speed += 20; // ค่อยๆช้าลง
-
-            if(spinCount < 45){
+            if(spinCount > 20) speed += 15;
+            if(spinCount < 40){
                 setTimeout(spinStep, speed);
             } else {
                 prizeDisplay.classList.remove("spinning");
-                prizeDisplay.textContent = finalPrize;
-                showWinEffect(finalPrize);
+                prizeDisplay.textContent = selectedPrize;
+                showWinEffect(selectedPrize);
             }
         }
-
         spinStep();
     }
 
-    // ================== เอฟเฟกต์ตอนถูกรางวัล ==================
-function showWinEffect(prize){
+    function createLineButton(){
+        let lineBtn = document.getElementById("line-contact-btn");
+        if(!lineBtn){
+            lineBtn = document.createElement("a");
+            lineBtn.id = "line-contact-btn";
+            lineBtn.className = "line-btn pulse";
+            lineBtn.target = "_blank";
+            lineBtn.href = "https://line.me/R/ti/p/@685pkvqa"; // LINE OA ของคุณ
+            lineBtn.innerHTML = '<img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" class="line-icon"> ติดต่อเจ้าหน้าที่ผ่าน LINE';
+            container.appendChild(lineBtn);
+        }
+    }
 
-    const username = usernameInput.value.trim();
+    function showWinEffect(prize){
+        createLineButton();
+        if(prize.includes("ลุ้นใหม่")){
+            prizeDisplay.style.color = "#fff";
+            prizeDisplay.classList.remove("win-effect");
+            statusDiv.innerHTML = "📸 กรุณาแคปหน้าจอผลลัพธ์นี้เพื่อรับสิทธิ์ในครั้งต่อไป";
+            statusDiv.style.color = "#FFD700";
+            statusDiv.style.fontWeight = "bold";
+            return;
+        }
 
-    // สร้างปุ่ม LINE
-    createLineButton(username, prize);
+        prizeDisplay.style.color = "gold";
+        prizeDisplay.style.transform = "scale(1.2)";
+        prizeDisplay.classList.add("win-effect");
 
-    // กรณีลุ้นใหม่
-    if(prize.includes("ลุ้นใหม่")){
-
-        prizeDisplay.style.color = "#fff";
-        prizeDisplay.classList.remove("win-effect");
-
-        statusDiv.innerHTML =
-            "🧧 ขอขอบคุณที่ร่วมกิจกรรม ลุ้นใหม่ในครั้งถัดไปนะคะ 💖";
-
+        statusDiv.innerHTML = "🎉 กรุณาแคปหน้าจอผลลัพธ์นี้และติดต่อเจ้าหน้าที่เพื่อรับรางวัล";
         statusDiv.style.color = "#FFD700";
         statusDiv.style.fontWeight = "bold";
-        return;
+
+        for(let i=0;i<8;i++){
+            const firework = document.createElement("div");
+            firework.className = "firework";
+            firework.style.top = Math.random()*100 + "%";
+            firework.style.left = Math.random()*100 + "%";
+            container.appendChild(firework);
+            setTimeout(()=>firework.remove(),1000);
+        }
+
+        setTimeout(()=>{ prizeDisplay.style.transform="scale(1)"; },600);
     }
 
-    // กรณีได้รางวัล
-    prizeDisplay.style.color = "gold";
-    prizeDisplay.style.transform = "scale(1.2)";
-    prizeDisplay.classList.add("win-effect");
-
-    statusDiv.innerHTML =
-        "🎉 ยินดีด้วยค่ะ! กรุณากดปุ่มด้านล่างเพื่อแจ้งรับสิทธิ์";
-
-    statusDiv.style.color = "#FFD700";
-    statusDiv.style.fontWeight = "bold";
-
-    for(let i=0;i<8;i++){
-        const firework = document.createElement("div");
-        firework.className = "firework";
-        firework.style.top = Math.random()*100 + "%";
-        firework.style.left = Math.random()*100 + "%";
-        container.appendChild(firework);
-        setTimeout(()=>firework.remove(),1000);
-    }
-
-    setTimeout(()=>{
-        prizeDisplay.style.transform="scale(1)";
-    },600);
-}
-
-
-
-    // ================== ปุ่มเริ่ม ==================
-    startBtn.addEventListener('click', async () => {
-
-        if(isPlaying) return;
-
+    startBtn.addEventListener('click', () => {
         const username = usernameInput.value.trim();
         if(!username) return alert("กรุณาใส่ยูสเซอร์เนม");
 
-        isPlaying = true;
-        startBtn.disabled = true;
-        statusDiv.textContent = "⏳ กำลังตรวจสอบข้อมูล...";
+        const userRow = getUserRow(username);
+        if(!userRow) return alert("ไม่พบชื่อในระบบ");
 
-        // ทำให้ดูเหมือนกำลังสุ่ม
-        prizeDisplay.textContent = "🎰 กำลังสุ่ม...";
-        
-        try{
-
-            // หน่วงเวลาเล็กน้อยให้ดูสมจริง
-            await new Promise(r => setTimeout(r, 1200));
-
-            const resp = await fetch(SCRIPT_URL,{
-                method:"POST",
-                body: JSON.stringify({username})
-            });
-
-            const result = await resp.json();
-
-            if(result.status === "notfound"){
-                alert("ไม่พบชื่อในระบบ");
-                resetGame();
-                return;
-            }
-
-            if(result.status === "played"){
-                prizeDisplay.textContent = 
-                    `คุณเล่นแล้ว ได้: ${result.prize}`;
-                statusDiv.textContent = "⚠️ บัญชีนี้เล่นแล้ว";
-                return;
-            }
-
-            // เริ่ม animation แล้วไปหยุดที่รางวัลจริง
-            spinAnimation(result.prize);
-
-            statusDiv.textContent = "✅ บันทึกผลเรียบร้อยแล้ว";
-
-        }catch(e){
-            console.error(e);
-            alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
-            resetGame();
+        if(userRow[2]==="YES"){
+            prizeDisplay.textContent = `คุณเล่นแล้ว ได้: ${userRow[1]}`;
+            startBtn.disabled = true;
+            return;
         }
 
+        selectedPrize = userRow[1] || "🧧 ลุ้นใหม่ในกิจกรรมครั้งหน้า";
+        prizeDisplay.innerHTML = "🎰 กำลังสุ่ม...";
+        startBtn.disabled = true;
+        spinAnimation(selectedPrize);
     });
 
-    // ================== Reset ==================
-    function resetGame(){
-        isPlaying = false;
-        startBtn.disabled = false;
-        prizeDisplay.textContent = "🎁 กดเริ่มเพื่อเล่น";
-        statusDiv.textContent = "";
-    }
-
 })();
-});
