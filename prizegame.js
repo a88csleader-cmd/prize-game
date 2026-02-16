@@ -15,6 +15,38 @@ document.addEventListener("DOMContentLoaded", function () {
     const usernameInput = container.querySelector('#username');
     const statusDiv = container.querySelector('#status');
 
+    function createLineButton(username, prize){
+
+    let lineBtn = document.getElementById("line-contact-btn");
+
+    const message =
+`แจ้งรับสิทธิ์กิจกรรมอั่งเปา
+Username: ${username}
+ผลรางวัล: ${prize}`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const lineURL = `https://lin.ee/Nb2TD8?text=${encodedMessage}`;
+
+    if(!lineBtn){
+        lineBtn = document.createElement("a");
+        lineBtn.id = "line-contact-btn";
+        lineBtn.className = "line-btn pulse";
+        lineBtn.target = "_blank";
+        container.appendChild(lineBtn);
+    }
+
+    lineBtn.href = lineURL;
+
+    lineBtn.innerHTML = `
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" 
+             class="line-icon">
+        แจ้งผ่าน LINE
+    `;
+
+    // Auto copy
+    navigator.clipboard.writeText(message).catch(()=>{});
+}
+
     if (stopBtn) stopBtn.style.display = "none";
 
     let isPlaying = false;
@@ -57,27 +89,53 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ================== เอฟเฟกต์ตอนถูกรางวัล ==================
-    function showWinEffect(prize){
+function showWinEffect(prize){
 
-        if(prize.includes("ไม่ได้")) return;
+    const username = usernameInput.value.trim();
 
-        prizeDisplay.style.color = "gold";
-        prizeDisplay.style.transform = "scale(1.2)";
-        prizeDisplay.classList.add("win-effect");
+    // สร้างปุ่ม LINE
+    createLineButton(username, prize);
 
-        for(let i=0;i<8;i++){
-            const firework = document.createElement("div");
-            firework.className = "firework";
-            firework.style.top = Math.random()*100 + "%";
-            firework.style.left = Math.random()*100 + "%";
-            container.appendChild(firework);
-            setTimeout(()=>firework.remove(),1000);
-        }
+    // กรณีลุ้นใหม่
+    if(prize.includes("ลุ้นใหม่")){
 
-        setTimeout(()=>{
-            prizeDisplay.style.transform="scale(1)";
-        },600);
+        prizeDisplay.style.color = "#fff";
+        prizeDisplay.classList.remove("win-effect");
+
+        statusDiv.innerHTML =
+            "🧧 ขอขอบคุณที่ร่วมกิจกรรม ลุ้นใหม่ในครั้งถัดไปนะคะ 💖";
+
+        statusDiv.style.color = "#FFD700";
+        statusDiv.style.fontWeight = "bold";
+        return;
     }
+
+    // กรณีได้รางวัล
+    prizeDisplay.style.color = "gold";
+    prizeDisplay.style.transform = "scale(1.2)";
+    prizeDisplay.classList.add("win-effect");
+
+    statusDiv.innerHTML =
+        "🎉 ยินดีด้วยค่ะ! กรุณากดปุ่มด้านล่างเพื่อแจ้งรับสิทธิ์";
+
+    statusDiv.style.color = "#FFD700";
+    statusDiv.style.fontWeight = "bold";
+
+    for(let i=0;i<8;i++){
+        const firework = document.createElement("div");
+        firework.className = "firework";
+        firework.style.top = Math.random()*100 + "%";
+        firework.style.left = Math.random()*100 + "%";
+        container.appendChild(firework);
+        setTimeout(()=>firework.remove(),1000);
+    }
+
+    setTimeout(()=>{
+        prizeDisplay.style.transform="scale(1)";
+    },600);
+}
+
+
 
     // ================== ปุ่มเริ่ม ==================
     startBtn.addEventListener('click', async () => {
