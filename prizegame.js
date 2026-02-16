@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "💰 อั่งเปาพิเศษ","🎁 ของขวัญปีใหม่","🧧 ลุ้นใหม่ในกิจกรรมครั้งหน้า"
     ];
 
+    // สร้างปุ่ม LINE
     function createLineButton(){
         if(document.getElementById("line-contact-btn")) return;
         const lineBtn = document.createElement("a");
@@ -37,15 +38,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function showResult(prize){
         createLineButton();
+
         if(prize.includes("ลุ้นใหม่")){
             prizeDisplay.style.color = "#fff";
             statusDiv.innerHTML = "📸 กรุณาแคปหน้าจอผลลัพธ์นี้เพื่อรับสิทธิ์ในครั้งต่อไป";
             return;
         }
+
         prizeDisplay.style.color = "gold";
         statusDiv.innerHTML = "🎉 กรุณาแคปหน้าจอผลลัพธ์นี้และติดต่อเจ้าหน้าที่เพื่อรับรางวัล";
 
-        // เอฟเฟกต์เล็กๆ
+        // เอฟเฟกต์พลุเล็ก
         for(let i=0;i<8;i++){
             const firework = document.createElement("div");
             firework.className = "firework";
@@ -56,7 +59,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function spinAnimation(fakePrize, callback){
+    // ฟังก์ชัน spin ปลอม (แค่โชว์ effect) + callback หลังจบ
+    function spinAnimation(callback){
         let speed = 50;
         let spinCount = 0;
         prizeDisplay.classList.add("spinning");
@@ -69,8 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 setTimeout(step, speed);
             } else {
                 prizeDisplay.classList.remove("spinning");
-                prizeDisplay.textContent = fakePrize;
-                callback();
+                callback(); // เรียกเพื่อ fetch รางวัลจริง
             }
         }
         step();
@@ -81,40 +84,43 @@ document.addEventListener("DOMContentLoaded", function () {
         if(!username) return alert("กรุณาใส่ยูสเซอร์เนม");
 
         startBtn.disabled = true;
-        const fakePrize = spinItems[Math.floor(Math.random()*spinItems.length)];
         prizeDisplay.textContent = "🎰 กำลังสุ่ม...";
 
-        // สปินโชว์แบบปลอมก่อน
-        spinAnimation(fakePrize, async () => {
-            try{
-                const resp = await fetch(SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify({username})
-                });
-                const data = await resp.json();
+        // 1️⃣ ก่อนหมุน ตรวจสอบกับ Apps Script ว่าสมาชิกเล่นแล้วหรือไม่
+        try{
+            const resp = await fetch(SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify({username})
+            });
+            const data = await resp.json();
 
-                if(data.status === "notfound"){
-                    prizeDisplay.textContent = "❌ ไม่พบชื่อในระบบ";
-                    statusDiv.textContent = "กรุณาตรวจสอบยูสเซอร์เนมอีกครั้ง";
-                    startBtn.disabled = false;
-                    return;
-                }
+            if(data.status === "notfound"){
+                prizeDisplay.textContent = "❌ ไม่พบชื่อในระบบ";
+                statusDiv.textContent = "กรุณาตรวจสอบยูสเซอร์เนมอีกครั้ง";
+                startBtn.disabled = false;
+                return;
+            }
 
+            if(data.status === "played"){
+                prizeDisplay.textContent = `คุณเล่นไปแล้ว ได้: ${data.prize}`;
+                statusDiv.textContent = "✅ ไม่สามารถหมุนซ้ำได้";
+                return; // หยุดไม่ให้หมุน
+            }
+
+            // 2️⃣ ถ้ายังไม่เคยเล่น ให้ทำสปินปลอมก่อน
+            spinAnimation(() => {
+                // 3️⃣ แสดงรางวัลจริงจาก Apps Script
                 selectedPrize = data.prize || "🧧 ลุ้นใหม่ในกิจกรรมครั้งหน้า";
                 prizeDisplay.textContent = selectedPrize;
+                showResult(selectedPrize);
+            });
 
-                if(data.status === "played"){
-                    statusDiv.textContent = "คุณเล่นไปแล้ว";
-                } else {
-                    showResult(selectedPrize);
-                }
-
-            } catch(e){
-                console.error("ส่งข้อมูลไป Apps Script ล้มเหลว", e);
-                prizeDisplay.textContent = "⚠️ เกิดข้อผิดพลาด";
-                statusDiv.textContent = "ลองรีเฟรชหน้าจอแล้วเล่นอีกครั้ง";
-            }
-        });
+        } catch(e){
+            console.error("ส่งข้อมูลไป Apps Script ล้มเหลว", e);
+            prizeDisplay.textContent = "⚠️ เกิดข้อผิดพลาด";
+            statusDiv.textContent = "ลองรีเฟรชหน้าจอแล้วเล่นอีกครั้ง";
+            startBtn.disabled = false;
+        }
     });
 
 })();
