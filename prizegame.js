@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const usernameInput = container.querySelector('#username');
     const statusDiv = container.querySelector('#status');
 
-    function createLineButton(username, prize){
+function createLineButton(username, prize){
 
     let lineBtn = document.getElementById("line-contact-btn");
 
@@ -25,7 +25,9 @@ Username: ${username}
 ผลรางวัล: ${prize}`;
 
     const encodedMessage = encodeURIComponent(message);
-    const lineURL = `https://lin.ee/Nb2TD8?text=${encodedMessage}`;
+
+    // 🔥 ใช้ลิงก์ OA ของคุณ
+    const lineURL = `https://lin.ee/Nb2TD8R?text=${encodedMessage}`;
 
     if(!lineBtn){
         lineBtn = document.createElement("a");
@@ -43,9 +45,10 @@ Username: ${username}
         แจ้งผ่าน LINE
     `;
 
-    // Auto copy
+    // auto copy ข้อความไว้ใน clipboard ด้วย
     navigator.clipboard.writeText(message).catch(()=>{});
 }
+
 
     if (stopBtn) stopBtn.style.display = "none";
 
