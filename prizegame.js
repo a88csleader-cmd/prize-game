@@ -1,5 +1,6 @@
-document.addEventListener("DOMContentLoaded", function () {
-  (function(){
+(function(){
+  // ตรวจสอบ DOM พร้อม
+  function initGame(){
     const container = document.getElementById('prize-game-container');
     if(!container){
         console.error("ไม่พบ #prize-game-container");
@@ -91,5 +92,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         spinAnimation(selectedPrize);
     });
-  })();
-});
+  }
+
+  // ถ้า DOM พร้อมแล้วให้เรียก initGame()
+  if(document.readyState === "loading"){
+      document.addEventListener("DOMContentLoaded", initGame);
+  } else {
+      initGame();
+  }
+
+})();
